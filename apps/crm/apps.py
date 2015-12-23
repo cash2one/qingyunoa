@@ -4,9 +4,9 @@ from django.apps import AppConfig
 __author__ = 'lyhapple'
 
 
-class MessageAppConfig(AppConfig):
-    name = "core.messageset"
-    verbose_name = u"消息中心"
+class CRMAppConfig(AppConfig):
+    name = "apps.crm"
+    verbose_name = u"客户关系管理"
 
     def ready(self):
         import serializers

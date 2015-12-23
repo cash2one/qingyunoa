@@ -1,49 +1,32 @@
-# django-adminlte
+# 轻云办公套件
 
-    注意: 以下内容基于Mac OSX
+基于lyhapple/django-adminlte.git开源快速开发平台开发
 
-## 依赖
-
-* python 2.7
-* django 1.8
-
-## 技术栈
-
-* 前端：
-    * jquery, vue.js, underscore
-    * adminlte 开源前端模板
-    
-* 后端
-    * django
-    * django-rest-framework
-    * django-mptt
-    * django-registration
-    
 
 ## 准备工作：
 
 推荐使用virutalenv环境
 
 1. pip install virtualenv
-2. virtualenv lte
-3. source lte/bin/activate
-4. cd lte
+2. virtualenv oa
+3. source oa/bin/activate
+4. cd oa
 
 
 ## 跑起来
 
-1. git clone git@github.com:lyhapple/django-adminlte.git
-2. cd django-adminlte
+1. git clone git@github.com:lyhapple/qingyunoa.git
+2. cd qingyunoa
 3. pip install -r requirement.txt
 4. python manage_dev.py migrate
 5. python manage_dev.py loaddata conf/fixture_data.json
 6. python manage_dev.py runserver
 
-## 开发与使用
+## 使用
 
-### 开发者文档
+### 用户文档
 
-请参考 docs/develop.md
+请参考 docs/manual.md
 
 如需fork，请使用develop分支，并向该分支提交 pull request。
 
@@ -54,6 +37,3 @@
 
 2. django自带后台地址为: /admin/
 
-3. 写好Model 与 serializer 类之后，可以通过菜单管理页面，增加管理入口，
-比如，创建了名为demo的app, 然后新增了一个Product Model,
-再新增一个ProductSerializer类, 最后即可在菜单管理页面增加对Product数据的管理入口

@@ -45,11 +45,14 @@ INSTALLED_APPS = (
     'rest_framework',
     'django_js_reverse',
 
-    # my_app
+    # django_adminlte_app
     'core.adminlte',
     'core.registration',
     'core.messageset',
-    'core.organization'
+    'core.organization',
+
+    # qingyun_oa
+    'apps.crm',
 )
 
 MIDDLEWARE_CLASSES = (
