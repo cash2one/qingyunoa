@@ -2,6 +2,7 @@
 
 from django.db import models
 from core.adminlte.models import BaseModel, SystemConfig
+from core.organization.models import Staff
 
 
 class Product(BaseModel):
@@ -34,3 +35,14 @@ class Product(BaseModel):
         list_form_fields = list_display_fields
         search_fields = ('name',)
         filter_fields = list_display_fields
+
+
+class Customer(BaseModel):
+    name = models.CharField(
+        verbose_name=u'名称', max_length=200
+    )
+    assign_to = models.ForeignKey(
+        Staff,
+        verbose_name=u'指派',
+
+    )
