@@ -1,6 +1,6 @@
 # coding=utf-8
 from rest_framework import serializers
-from .models import Product, Customer, Contact, Order
+from .models import Product, Customer, Contact, Order, Contract
 
 __author__ = 'lyhapple'
 
@@ -90,4 +90,28 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = Order.Config.list_display_fields
+        read_only_fields = ('id', )
+
+
+class ContractSerializer(serializers.ModelSerializer):
+    order = serializers.SerializerMethodField()
+    pay_status = serializers.SerializerMethodField()
+    delivery_status = serializers.SerializerMethodField()
+    contract_status = serializers.SerializerMethodField()
+
+    def get_pay_status(self, obj):
+        return obj.pay_status.value
+
+    def get_delivery_status(self, obj):
+        return obj.delivery_status.value
+
+    def get_contract_status(self, obj):
+        return obj.contract_status.value
+
+    def get_order(self, obj):
+        return obj.order.__unicode__()
+
+    class Meta:
+        model = Contract
+        fields = Contract.Config.list_display_fields
         read_only_fields = ('id', )

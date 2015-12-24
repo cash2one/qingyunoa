@@ -256,3 +256,78 @@ class Order(BaseModel, UsableStatus):
         list_form_fields = list_display_fields
         search_fields = ('customer', 'product', )
         filter_fields = search_fields
+
+
+class Contract(BaseModel, UsableStatus):
+    order = models.ForeignKey(
+        Order,
+        verbose_name=u'所属订单',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    number = models.CharField(
+        verbose_name=u'合同编号',
+        max_length=200,
+        default='',
+        **DICT_NULL_BLANK_TRUE
+    )
+    amount = models.FloatField(
+        verbose_name=u'合同金额',
+        default=0.0,
+        **DICT_NULL_BLANK_TRUE
+    )
+    start_date = models.DateField(
+        verbose_name=u'开始日期'
+    )
+    end_date = models.DateField(
+        verbose_name=u'结束日期'
+    )
+    pay_status = models.ForeignKey(
+        SystemConfig,
+        limit_choices_to={'parent__name': 'pay_status'},
+        verbose_name=u'付款状态',
+        related_name='+',
+        **DICT_NULL_BLANK_TRUE
+    )
+    delivery_status = models.ForeignKey(
+        SystemConfig,
+        limit_choices_to={'parent__name': 'delivery_status'},
+        verbose_name=u'交付状态',
+        related_name='+',
+        **DICT_NULL_BLANK_TRUE
+    )
+    contract_status = models.ForeignKey(
+        SystemConfig,
+        limit_choices_to={'parent__name': 'contract_status'},
+        verbose_name=u'合同状态',
+        related_name='+',
+        **DICT_NULL_BLANK_TRUE
+    )
+    status = models.PositiveSmallIntegerField(
+        u'数据状态', choices=UsableStatus.STATUS,
+        default=UsableStatus.USABLE
+    )
+
+    def __unicode__(self):
+        return u'%s(%s)' % (self.number, self.order)
+
+    def get_absolute_url(self):
+        return reverse(
+            'adminlte:common_detail_page',
+            kwargs={
+                'app_name': self._meta.app_label,
+                'model_name': self._meta.model_name,
+                'pk': self.id
+            }
+        )
+
+    class Meta:
+        verbose_name_plural = verbose_name = u'合同'
+
+    class Config:
+        list_display_fields = ('order', 'number', 'amount', 'start_date',
+                               'end_date', 'pay_status', 'delivery_status',
+                               'contract_status', 'id')
+        list_form_fields = list_display_fields
+        search_fields = ('number', )
+        filter_fields = search_fields
