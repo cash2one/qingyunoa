@@ -1,6 +1,6 @@
 # coding=utf-8
 from rest_framework import serializers
-from .models import Product, Customer
+from .models import Product, Customer, Contact, Order
 
 __author__ = 'lyhapple'
 
@@ -46,4 +46,48 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = Customer.Config.list_display_fields
+        read_only_fields = ('id', )
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    customer = serializers.SerializerMethodField()
+    position = serializers.SerializerMethodField()
+
+    def get_customer(self, obj):
+        return '<a href="%s">%s</a>' % (obj.customer.get_absolute_url(),
+                                        obj.customer.name)
+
+    def get_position(self, obj):
+        return obj.get_position_display()
+
+    class Meta:
+        model = Contact
+        fields = Contact.Config.list_display_fields
+        read_only_fields = ('id', )
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    order_status = serializers.SerializerMethodField()
+    assign_to = serializers.SerializerMethodField()
+
+    def get_order_status(self, obj):
+        return obj.order_status.value
+
+    def get_assign_to(self, obj):
+        return '<a href="%s">%s</a>' % (obj.assign_to.get_absolute_url(),
+                                        obj.assign_to.real_name)
+
+    def get_customer(self, obj):
+        return '<a href="%s">%s</a>' % (obj.customer.get_absolute_url(),
+                                        obj.customer.name)
+
+    def get_product(self, obj):
+        return '<a href="%s">%s</a>' % (obj.product.get_absolute_url(),
+                                        obj.product.name)
+
+    class Meta:
+        model = Order
+        fields = Order.Config.list_display_fields
         read_only_fields = ('id', )

@@ -1,12 +1,16 @@
 # coding=utf-8
+from django.core.urlresolvers import reverse
 
 from django.db import models
-from core.adminlte.constants import DICT_NULL_BLANK_TRUE
+from core.adminlte.constants import DICT_NULL_BLANK_TRUE, UsableStatus
 from core.adminlte.models import BaseModel, SystemConfig
-from core.organization.models import Staff
+from core.organization.models import Staff, AbstractPersonInfo
 
 
 class Product(BaseModel):
+    """
+    产品模型
+    """
     name = models.CharField(
         verbose_name=u'名称', max_length=100
     )
@@ -28,6 +32,16 @@ class Product(BaseModel):
     def __unicode__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse(
+            'adminlte:common_detail_page',
+            kwargs={
+                'app_name': self._meta.app_label,
+                'model_name': self._meta.model_name,
+                'pk': self.id
+            }
+        )
+
     class Meta:
         verbose_name_plural = verbose_name = u'产品'
 
@@ -39,6 +53,9 @@ class Product(BaseModel):
 
 
 class Customer(BaseModel):
+    """
+    客户模型
+    """
     name = models.CharField(
         verbose_name=u'名称', max_length=200
     )
@@ -80,19 +97,41 @@ class Customer(BaseModel):
         default=None,
         **DICT_NULL_BLANK_TRUE
     )
-    last_contact_time = models.DateTimeField(
-        verbose_name=u'最后联系时间',
+    last_contact_date = models.DateField(
+        verbose_name=u'最后联系',
         default=None,
         **DICT_NULL_BLANK_TRUE
     )
-    next_contact_time = models.DateTimeField(
-        verbose_name=u'最后联系时间',
+    next_contact_date = models.DateField(
+        verbose_name=u'下次联系',
         default=None,
         **DICT_NULL_BLANK_TRUE
     )
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse(
+            'adminlte:common_detail_page',
+            kwargs={
+                'app_name': self._meta.app_label,
+                'model_name': self._meta.model_name,
+                'pk': self.id
+            }
+        )
+
+    @staticmethod
+    def update_contact_date(customer, last_date, next_date):
+        """
+        更新联系时间
+        :param customer: 客户实例
+        :param last_date: 最后联系时间
+        :param next_date: 下次联系时间
+        """
+        customer.last_contact_date = last_date
+        customer.next_contact_date = next_date
+        customer.save()
 
     class Meta:
         verbose_name_plural = verbose_name = u'客户'
@@ -104,3 +143,116 @@ class Customer(BaseModel):
         list_form_fields = ('name', 'assign_to',
                             'scale', 'ctype', 'status',
                             'grade')
+
+
+class Contact(AbstractPersonInfo):
+    """
+    联系人模型
+    """
+    customer = models.ForeignKey(
+        Customer,
+        related_name='+',
+        verbose_name=u'所属客户',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    department = models.CharField(
+        verbose_name=u'部门',
+        max_length=200,
+        default='',
+        **DICT_NULL_BLANK_TRUE
+    )
+    fax = models.CharField(
+        verbose_name=u'传真',
+        max_length=20,
+        default='',
+        **DICT_NULL_BLANK_TRUE
+    )
+    note = models.TextField(
+        verbose_name=u'备注',
+        default='',
+        **DICT_NULL_BLANK_TRUE
+    )
+
+    def __unicode__(self):
+        return self.real_name
+
+    class Meta:
+        verbose_name_plural = verbose_name = u'联系人'
+
+    class Config:
+        list_display_fields = ('real_name', 'customer', 'position',
+                               'cellphone', 'email', 'qq', 'id')
+        list_form_fields = list_display_fields + ('sex', 'job_status',
+                                                  'birthday', 'location', )
+        filter_fields = ('status', )
+        search_fields = ('real_name', 'cellphone')
+
+
+class Order(BaseModel, UsableStatus):
+    """
+    订单模型
+    """
+    customer = models.ForeignKey(
+        Customer,
+        related_name='+',
+        verbose_name=u'所属客户',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    product = models.ForeignKey(
+        Product,
+        related_name='+',
+        verbose_name=u'产品',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    assign_to = models.ForeignKey(
+        Staff,
+        verbose_name=u'指派给',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    plan_amount = models.FloatField(
+        verbose_name=u'计划金额(RMB)',
+        default=0.0,
+    )
+    deal_amount = models.FloatField(
+        verbose_name=u'成交金额(RMB)',
+        default=0.0
+    )
+    last_contact_date = models.DateField(
+        verbose_name=u'最后联系',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    next_contact_date = models.DateField(
+        verbose_name=u'下次联系',
+        default=None,
+        **DICT_NULL_BLANK_TRUE
+    )
+    order_status = models.ForeignKey(
+        SystemConfig,
+        verbose_name=u'状态',
+        related_name='+',
+        limit_choices_to={'parent__name': 'order_status'}
+    )
+    status = models.PositiveSmallIntegerField(
+        u'数据状态', choices=UsableStatus.STATUS,
+        default=UsableStatus.USABLE
+    )
+
+    def __unicode__(self):
+        return u'%s购买%s' % (self.customer.name, self.product.name)
+
+    class Meta:
+        verbose_name_plural = verbose_name = u'订单'
+
+    class Config:
+        list_display_fields = (
+            'customer', 'product', 'plan_amount', 'deal_amount', 'assign_to',
+            'order_status', 'id'
+        )
+        list_form_fields = list_display_fields
+        search_fields = ('customer', 'product', )
+        filter_fields = search_fields
