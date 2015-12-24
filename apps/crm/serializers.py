@@ -6,6 +6,14 @@ __author__ = 'lyhapple'
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    ptype = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_ptype(self, obj):
+        return obj.ptype.value
+
+    def get_status(self, obj):
+        return obj.status.value
 
     class Meta:
         model = Product
